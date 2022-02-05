@@ -83,7 +83,7 @@ function createHoverReveal(e) {
 	const { imageBlock, image, mask, text, textCopy, textMask, textP } =
 		e.target; //! ovo. WOW
 	// console.log(imageBlock, mask);
-	// console.log(e.target.dataset.color);
+	console.log(e.target.dataset.color);
 
 	let tl = gsap.timeline({
 		defaults: {
