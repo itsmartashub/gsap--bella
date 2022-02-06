@@ -12,6 +12,7 @@
 
 	--bcg-loaderblue: #758a94;
 	--bcg-loaderbluedark: #566c76;
+	--bcg-fill-color: var(--bcg-green);
 
 	--loader-width: 27.36vw;
 	--loader-height: 50vh;
@@ -27,6 +28,30 @@ body {
 		sans-serif;
 	color: var(--text-dark-color);
 }
+/* hide page content by default */
+.is-loading #main,
+.is-loading .logo,
+.is-loading .burger,
+.is-loading .main-nav,
+.is-loading .fill-background {
+	display: none;
+}
+.is-loading {
+	background-color: var(--bcg-loaderblue);
+}
+.is-transitioning {
+	pointer-events: none;
+	cursor: progress;
+}
+
+#viewport {
+	overflow: hidden;
+	position: fixed;
+	height: 100%;
+	width: 100%;
+	top: 0;
+	left: 0;
+}
 
 /* =Top Nav */
 .logo {
@@ -37,8 +62,7 @@ body {
 	display: flex;
 	align-items: center;
 	z-index: 3;
-
-	pointer-events: none; /* //! important to be able to hover over links under the image */
+	pointer-events: none;
 }
 .logo__img {
 	width: 55px;
@@ -119,7 +143,7 @@ body {
 	position: relative;
 	overflow: hidden;
 }
-.main-nav a:after {
+.main-nav a::after {
 	display: block;
 	content: '';
 	height: 2px;
@@ -202,8 +226,7 @@ header h1 span {
 	left: 58%;
 	background: url('../img/img_logo.svg') no-repeat center;
 	background-size: 50% 50%;
-
-	pointer-events: none; /* //! important to be able to hover over links under the image */
+	pointer-events: none;
 }
 .cta__circle--logo {
 	width: 7.7vw;
@@ -225,16 +248,16 @@ header h1 span {
 }
 
 /* =Header Gallery (random image proportion) 
-  Calculate aspect by setting a width first, then adjust padding bottom.
-  Example for image that you want to show as 16/9 - landscape
-  width: 24vw, padding-bottom: (9/16) * width = 13.5
+	Calculate aspect by setting a width first, then adjust padding bottom.
+	Example for image that you want to show as 16/9 - landscape
+	width: 24vw, padding-bottom: (9/16) * width = 13.5
+	
+	Example for image that you want to show as 9/16 - portrait
+	width: 24vw, padding-bottom: (16/9) * width = 42.6
   
-  Example for image that you want to show as 9/16 - portrait
-  width: 24vw, padding-bottom: (16/9) * width = 42.6
-
-  Have fun:)
-
-*/
+	Have fun:)
+  
+  */
 .hg__image,
 .rg__image {
 	position: absolute;
@@ -292,7 +315,6 @@ header h1 span {
 	top: 27vh;
 	left: auto;
 	right: 10vw;
-	z-index: 1;
 }
 .hg__right .hg__image:nth-child(3) {
 	top: 56vh;
@@ -300,19 +322,19 @@ header h1 span {
 	right: 19vw;
 	width: 16vw;
 	padding-bottom: 20vw;
+	z-index: 1;
 }
 
 /* =Reveal Gallery */
 .reveal-gallery {
 	width: 100%;
-	height: 100vh;
+	height: 104vh;
 	overflow: hidden;
 	display: flex;
 	justify-content: center;
 	color: var(--text-color);
 	position: relative;
 	z-index: 1;
-	flex-direction: column;
 }
 .rg__column {
 	flex-grow: 1; /* equivalent to 33.33% */
@@ -322,7 +344,6 @@ header h1 span {
 	justify-content: center;
 	position: relative;
 	overflow: hidden;
-	min-height: 50vh;
 }
 .rg__text--heading h3 {
 	font-size: 3.6vw;
@@ -339,28 +360,18 @@ header h1 span {
 	font-weight: normal;
 }
 .rg__text {
-	/* max-width: 17vw; */
+	max-width: 17vw;
 	z-index: 1;
 	position: relative;
-}
-.rg__text--mask {
-	overflow: hidden;
-}
-.rg__text--copy {
-	position: absolute;
-	overflow: hidden;
-}
-.rg__text--copy p {
-	margin: 0;
 }
 .rg__text--copy,
 .stage__text p {
 	font-weight: 300;
 	letter-spacing: 0.03vw;
 }
-/* .rg__column.left {background-color:var(--bcg-lightgreen)}
-.rg__column.center {background-color: var(--bcg-lightbrown)}
-.rg__column.right {background-color:var(--bcg-lightblue)} */
+.rg__text--copy p {
+	margin: 0;
+}
 .rg__column::before {
 	display: block;
 	position: absolute;
@@ -377,37 +388,21 @@ header h1 span {
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
-	position: absolute;
-	top: 0;
-	left: 0;
-	background-color: #000000;
-	pointer-events: none;
-
-	/* transform: translateY(-100%);
-	transition: transform 0.45s var(--easing); */
 }
 .rg__image--mask {
 	height: 100%;
 	overflow: hidden;
-
-	/* transition: transform 0.45s var(--easing);
-	transform: translateY(100%); */
 }
 .rg__image img {
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	position: absolute;
-	object-fit: cover;
-	object-position: 50% 50%;
-	/* opacity: 0.8; */
 	opacity: 0.6;
 }
-/* .rg__column.is-active .rg__image,
-.rg__column.is-active .rg__image--mask {
-	transform: translateY(0);
-} */
+.rg__text--copy {
+	position: absolute;
+	overflow: hidden;
+}
+.rg__text--mask {
+	overflow: hidden;
+}
 
 /* =Loader */
 .loader,
@@ -429,7 +424,9 @@ header h1 span {
 	align-items: center;
 	width: 100%;
 	height: 100%;
-	background-color: var(--bcg-loaderblue);
+	background: var(--bcg-loaderblue) url('../img/img_logo.svg') no-repeat
+		center;
+	background-size: 155px 155px;
 	overflow: hidden;
 }
 .loader .inner,
@@ -439,6 +436,15 @@ header h1 span {
 }
 .loader .inner {
 	background-color: var(--bcg-loaderbluedark);
+	position: relative;
+}
+.loader .progress {
+	background-color: var(--bcg-lightblue);
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: var(--loader-width);
+	height: var(--loader-height);
 }
 .loader__content {
 	z-index: 4;
@@ -533,7 +539,7 @@ section {
 }
 .portfolio__image--l,
 .portfolio__image--s {
-	pointer-events: none; /* //! important to be able to hover over links under the image */
+	pointer-events: none; /* important to be able to hover over links under the image */
 	position: absolute;
 	width: 28vw;
 	top: 11vh;
@@ -566,6 +572,9 @@ section {
 	width: 100%;
 	height: 100%;
 	position: fixed;
+	will-change: background-color;
+	background-color: var(--bcg-fill-color);
+	transition: background-color 0.3s linear;
 }
 
 /* =Blog */
@@ -709,28 +718,13 @@ section {
 /* =Footer */
 
 /* ==========================================================================
-  Media Queries
- ========================================================================== */
+	Media Queries
+   ========================================================================== */
 
 @media only screen and (min-width: 480px) {
 }
 
 @media only screen and (min-width: 768px) {
-	/* =Reveal Gallery */
-	.reveal-gallery {
-		flex-direction: row;
-		height: 100vh;
-	}
-	.rg__column {
-		min-height: auto;
-	}
-	.rg__text--copy {
-		position: absolute;
-		overflow: hidden;
-	}
-	.rg__text {
-		max-width: 17vw;
-	}
 }
 
 @media only screen and (min-width: 1140px) {

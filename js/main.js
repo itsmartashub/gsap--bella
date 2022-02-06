@@ -1,6 +1,15 @@
 gsap.registerPlugin(ScrollTrigger);
 
-let sections = document.querySelectorAll('.rg__column');
+const select = e => document.querySelector(e);
+const selectAll = e => document.querySelectorAll(e);
+
+const sections = selectAll('.rg__column');
+const allLinks = gsap.utils.toArray('.portfolio__categories a');
+const pageBackground = select('.fill-background');
+const largeImage = select('.portfolio__image--l');
+const smallImage = select('.portfolio__image--s');
+const lInside = select('.portfolio__image--l .image_inside');
+const sInside = select('.portfolio__image--s .image_inside');
 
 function initNavigation() {
 	const mainNavLinks = gsap.utils.toArray('.main-nav a'); //? [a, a, a, a, a]  ovo ce biti array od nasih linkova, da posle mozemo da lupujemo kroz njih
@@ -46,9 +55,47 @@ function initNavigation() {
 }
 
 function initHeaderTilt() {
-	document.querySelector('header').addEventListener('mousemove', moveImages);
+	select('header').addEventListener('mousemove', moveImages);
 }
+function moveImages(e) {
+	//! bitan css pointer-events: none; tipa na logo, na circle, da ne blokiramo ovaj mousemove kad "hoverujemo" preko ovih elemenata
+	const { offsetX, offsetY, target } = e;
+	const { clientWidth, clientHeight } = target;
 
+	//? ide 0 kada smo na sredini screena, i ide u plus 0.5 ako smo desno ili dole, ili -0.5 ako smo levo ili gore, kao u ovom slucaju
+	//? get 0 0 the center
+	const xPos = offsetX / clientWidth - 0.5;
+	const yPos = offsetY / clientHeight - 0.5;
+
+	// console.log(offsetX, offsetY, clientWidth, clientHeight);
+	// console.log(xPos, yPos);
+
+	const leftImages = gsap.utils.toArray('.hg__left .hg__image');
+	const rightImages = gsap.utils.toArray('.hg__right .hg__image');
+
+	const modifier = index => index * 1.2 + 0.5;
+	// move left 3 images
+	leftImages.forEach((image, index) => {
+		gsap.to(image, {
+			duration: 1.2,
+			x: xPos * 20 * modifier(index), // pomnozili smo s nekim vecim brojem da bi se movement primetio
+			y: yPos * 30 * modifier(index),
+			rotationY: xPos * 40,
+			rotationX: yPos * 10,
+			ease: 'Power3.out',
+		});
+	});
+	rightImages.forEach((image, index) => {
+		gsap.to(image, {
+			duration: 1.2,
+			x: xPos * 20 * modifier(index), // pomnozili smo s nekim vecim brojem da bi se movement primetio
+			y: -yPos * 30 * modifier(index),
+			rotationY: xPos * 40,
+			rotationX: yPos * 10,
+			ease: 'Power3.out',
+		});
+	});
+}
 function initHoverReveal() {
 	sections.forEach(section => {
 		// console.log(typeof section); //!!!! posto je ovo object, zato mozemo da mu attached neke propertije poput imageBlock i mask koji ce biti selektori, i posle ih pozovemo tj koristimo u onoj createHoverReaveal f-ji
@@ -72,18 +119,17 @@ function initHoverReveal() {
 		section.addEventListener('mouseleave', createHoverReveal);
 	});
 }
-
 function getTextHeight(textCopy) {
 	return textCopy.clientHeight;
 }
-
 function createHoverReveal(e) {
-	console.log(e.type);
+	// console.log(e.type);
 
-	const { imageBlock, image, mask, text, textCopy, textMask, textP } =
+	const { imageBlock, mask, text, textCopy, textMask, textP, image } =
 		e.target; //! ovo. WOW
+
 	// console.log(imageBlock, mask);
-	console.log(e.target.dataset.color);
+	// console.log(e.target.dataset.color);
 
 	let tl = gsap.timeline({
 		defaults: {
@@ -111,55 +157,96 @@ function createHoverReveal(e) {
 	return tl;
 }
 
-function moveImages(e) {
-	//! bitan css pointer-events: none; tipa na logo, na circle, da ne blokiramo ovaj mousemove kad "hoverujemo" preko ovih elemenata
-	const { offsetX, offsetY, target } = e;
-	const { clientWidth, clientHeight } = target;
-
-	//? ide 0 kada smo na sredini screena, i ide u plus 0.5 ako smo desno ili dole, ili -0.5 ako smo levo ili gore, kao u ovom slucaju
-	//? get 0 0 the center
-	const xPos = offsetX / clientWidth - 0.5;
-	const yPos = offsetY / clientHeight - 0.5;
-
-	// console.log(offsetX, offsetY, clientWidth, clientHeight);
-	// console.log(xPos, yPos);
-
-	const leftImages = gsap.utils.toArray('.hg__left .hg__image');
-	const rightImages = gsap.utils.toArray('.hg__right .hg__image');
-	const modifier = index => index * 1.2 + 0.5;
-	// move left 3 images
-	leftImages.forEach((image, index) => {
-		gsap.to(image, {
-			duration: 1.2,
-			x: xPos * 20 * modifier(index), // pomnozili smo s nekim vecim brojem da bi se movement primetio
-			y: yPos * 30 * modifier(index),
-			rotationY: xPos * 40,
-			rotationX: yPos * 10,
-			ease: 'Power3.out',
-		});
+function initPortfolioHover() {
+	allLinks.forEach(link => {
+		link.addEventListener('mouseenter', createPortfolioHover);
+		link.addEventListener('mouseleave', createPortfolioHover);
+		link.addEventListener('mousemove', createPortfolioMove);
 	});
-	rightImages.forEach((image, index) => {
-		gsap.to(image, {
-			duration: 1.2,
-			x: xPos * 20 * modifier(index), // pomnozili smo s nekim vecim brojem da bi se movement primetio
-			y: -yPos * 30 * modifier(index),
-			rotationY: xPos * 40,
-			rotationX: yPos * 10,
-			ease: 'Power3.out',
-		});
+}
+function createPortfolioHover(e) {
+	if (e.type === 'mouseenter') {
+		// change images to the right urls
+		// fade in images
+		// all siblings to white and fade out
+		// active link to white
+		// update page background color
+
+		const { color, imagelarge, imagesmall } = e.target.dataset; //! ovo su imena data-color, data-imagelarge, data-imagesmall
+		const allSiblings = allLinks.filter(link => link !== e.target); //! dohvatamo sve linkove osim ovog koji je aktivan tj koji smo hoverovali/mouseenterovali
+		const tl = gsap.timeline();
+
+		tl.set(lInside, { backgroundImage: `url(${imagelarge})` }) // setujemo bg vecu sliku na osnovu data-atributa
+			.set(sInside, { backgroundImage: `url(${imagesmall})` }) // setujemo bg ma nju sliku na osnovu data-atributa
+			.to([largeImage, smallImage], { autoAlpha: 1 }) // fejdujemo slike IN
+			.to(allSiblings, { color: '#fff', autoAlpha: 0.2 }, 0) // fejdujemo OUT sve siblings, sve linkove koje nisu trenutno mouseenter
+			.to(e.target, { color: '#fff', autoAlpha: 1 }, 0) // aktivan hoverovan link stavljamo mu fejd 1
+			.to(pageBackground, { backgroundColor: color, ease: 'none' }, 0); // menjamo bg color of stranice u zavisnosti od onog linka koji smo hoverovali pa koju boju ima u data-color
+
+		// tl.set(lInside, { backgroundImage: `url(${imagelarge})` })
+		// 	.set(sInside, { backgroundImage: `url(${imagesmall})` })
+		// 	.to([largeImage, smallImage], { autoAlpha: 1 })
+		// 	.to(allSiblings, { color: '#fff', autoAlpha: 0.2 }, 0)
+		// 	.to(e.target, { color: '#fff', autoAlpha: 1 }, 0)
+		// 	.to(pageBackground, { backgroundColor: color, ease: 'none' }, 0);
+	} else if (e.type === 'mouseleave') {
+		// fade out images
+		// all links back to black
+		// change page background color back to default #ACB7AB
+
+		const tl = gsap.timeline();
+		tl.to([largeImage, smallImage], { autoAlpha: 0 }) // fade out all the images
+			.to(allLinks, { color: '#000', autoAlpha: 1 }, 0) // all links back to black
+			.to(
+				pageBackground,
+				{ backgroundColor: '#ACB7AB', ease: 'none' },
+				0
+			); // change page background color back to default #ACB7AB
+	}
+}
+
+function createPortfolioMove(e) {
+	const { clientY } = e;
+
+	// console.log(
+	// 	clientY,
+	// 	select('.portfolio__categories').clientHeight
+	// );
+
+	// move large image
+	gsap.to(largeImage, {
+		duration: 1.2,
+		y: getPortfolioOffset(clientY) / 6, //? select('.portfolio__categories').clientHeight je visina tj height .portfolio__categories diva, clientY je distanca u pixelima od vrha windowa do mesta gde se trenutno cursor nalazi
+		// x: -getPortfolioOffset(clientY) / 10,
+		ease: 'Power3.out',
 	});
+	// move small image
+	gsap.to(smallImage, {
+		duration: 1.5,
+		y: getPortfolioOffset(clientY) / 3,
+		// y: -getPortfolioOffset(clientY) / 3,
+		// x: getPortfolioOffset(clientY) / 10,
+		ease: 'Power3.out',
+	});
+}
+
+function getPortfolioOffset(clientY) {
+	return -(select('.portfolio__categories').clientHeight / clientY);
 }
 
 function init() {
 	initNavigation();
 	initHeaderTilt();
-	// initHoverReveal();
+	initHoverReveal();
+	initPortfolioHover();
 }
 
 window.addEventListener('load', function () {
 	init();
 });
 
+// !============================= UKLONITI GSAP PROPS I EFEKTE ZA MOBILE ZA REVEALT GALLERY
+/*
 //define a breakpoint
 const mq = window.matchMedia('(min-width: 768px)'); // kopiramo css media-query fazon
 
@@ -211,3 +298,5 @@ function handleWidthChange(mq) {
 		resetProps([imageBlock, image, mask, text, textCopy, textMask, textP]);
 	});
 }
+*/
+// !============================= UKLONITI GSAP PROPS I EFEKTE ZA MOBILE ZA REVEALT GALLERY
