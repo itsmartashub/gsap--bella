@@ -29,9 +29,11 @@ body {
 	font: 16px/1.7 'Source Sans Pro', Helvetica, Helvetica Neue, Arial,
 		sans-serif;
 	color: var(--text-dark-color);
+
+	overflow-y: scroll; /* //! preventovace jumping za 15px od skrolbara (kad se dodaje i nestaje skrolbar) i stalno ce biti prikazan skrolbar */
 }
 /* hide page content by default */
-.is-loading #main,
+/* .is-loading #main,
 .is-loading .logo,
 .is-loading .burger,
 .is-loading .main-nav,
@@ -44,8 +46,9 @@ body {
 .is-transitioning {
 	pointer-events: none;
 	cursor: progress;
-}
+} */
 
+/* =GSAP Smooth Scrolling demo */
 #viewport {
 	overflow: hidden;
 	position: fixed;
@@ -53,6 +56,17 @@ body {
 	width: 100%;
 	top: 0;
 	left: 0;
+	z-index: 2;
+
+	/* //! i posto je ovo fixed, body nema uopste height, i to cemo osle popraviti sa js-om, a stavili smo width i height 100% od parenta jelte sto je body u ovom slucaju, pa smo izgubili i scrollbar. I to cemo da popravimo sa js tako sto cemo pokupiti height od scroll-containera (gde je sadrzaj) i dodeliti ga i bodiju */
+}
+#scroll-container {
+	position: absolute;
+	overflow: hidden;
+	width: 100%;
+	will-change: transform; /* //? zbog performansi */
+	backface-visibility: hidden; /* //? zbog performansi */
+	z-index: 3;
 }
 
 /* =Top Nav */

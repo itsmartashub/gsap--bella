@@ -1,4 +1,4 @@
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 const select = e => document.querySelector(e);
 const selectAll = e => document.querySelectorAll(e);
@@ -252,7 +252,7 @@ function initImageParallax() {
 			scrollTrigger: {
 				trigger: laxEl,
 				start: 'top bottom',
-				scrub: true, //! kada user skroluje nesto se desava, kada ne skroluje nista se ne desava. OVo je najbitniji properti za ovo
+				scrub: 1, //! kada user skroluje nesto se desava, kada ne skroluje nista se ne desava. OVo je najbitniji properti za ovo
 				// markers: true,
 			},
 		});
@@ -266,6 +266,7 @@ function initPinSteps() {
 		endTrigger: '#stage4',
 		end: 'center center',
 		pin: true,
+		pinReparent: true, // ! i dalje je pinovano, ali je premesteno u kodu izvan tog gde je u body direkt, ne unutar nekog elementa. Nije unutar #scroll-containera pa unutar tu nekog el jer se on skroluje, vec posto je fixed izbacili smo ga izvan. Probaj bez ovoga, pa vidi razliku. Mada kod mene ne radi bas kad se klikne, hm
 		// markers: true,
 	});
 
@@ -305,6 +306,23 @@ function initPinSteps() {
 	});
 }
 
+function initScrollTo() {
+	// fin all links and animate to the right position
+	gsap.utils.toArray('.fixed-nav a').forEach(link => {
+		const target = link.getAttribute('href');
+
+		link.addEventListener('click', e => {
+			e.preventDefault();
+
+			gsap.to(window, {
+				duration: 1.5,
+				scrollTo: target,
+				ease: 'Power2.out',
+			});
+		});
+	});
+}
+
 function init() {
 	initNavigation();
 	initHeaderTilt();
@@ -312,10 +330,39 @@ function init() {
 	initPortfolioHover();
 	initImageParallax();
 	initPinSteps();
+	initScrollTo();
+	// initSmoothScrolling();
 }
 
 window.addEventListener('load', function () {
 	init();
+});
+
+let container = select('#scroll-container');
+let height;
+function setHeight() {
+	height = container.clientHeight;
+	document.body.style.height = `${height}px`;
+}
+
+console.log(ScrollTrigger);
+
+ScrollTrigger.addEventListener('refreshInit', setHeight); //! ScrollTrigger i njegov refreshInit event se okine na prvom page loadu i svaki put kada se resizuje browser
+
+gsap.to(container, {
+	y: () => -(height - document.documentElement.clientHeight),
+	// ease: 'Power2.out', //! mnogo bolje kad je ease: 'none', scrub se pobrine za smooth, kasne bre efekti nad itd. Ali i kad je scrub: 3 je lose zapravo. Bolje koristiti neku lib za ovo.
+	ease: 'none',
+	scrollTrigger: {
+		trigger: document.body,
+		start: 'top top', // top of the body tj top of the #viewport,
+		end: 'bottom bottom',
+		scrub: 1, // take one second for the animation tj this tween to catch up
+		invalidateOnRefresh: true, // da se rifreuje kada user rifresuje ili rizajzuje window
+		markers: true,
+	},
+
+	//! kako popraviti parallax skrol i smooth? Pa dati im isti scrub da se syncuje ista brzina kao, i za pin staviti pinReparent: true
 });
 
 // !============================= UKLONITI GSAP PROPS I EFEKTE ZA MOBILE ZA REVEALT GALLERY
