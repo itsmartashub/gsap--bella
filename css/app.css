@@ -21,6 +21,8 @@
 	--h-gutter: 6.6vw;
 
 	--easing: cubic-bezier(0.5, 0.7, 0.4, 1);
+
+	--za-parallax: 40%;
 }
 
 body {
@@ -596,8 +598,11 @@ section {
 }
 .blog__image img {
 	opacity: 1;
-	height: 120%;
-	top: -20%;
+	/* height: 120%;
+	top: -20%; */
+
+	height: calc(100% + var(--za-parallax));
+	top: calc(var(--za-parallax) * -1);
 }
 .post__date {
 	font-size: 1.6vw;
@@ -708,8 +713,11 @@ section {
 }
 .stage__image img {
 	opacity: 0.9;
-	height: 120%;
-	top: -20%;
+	/* height: 120%;
+	top: -20%; */
+
+	height: calc(100% + var(--za-parallax));
+	top: calc(var(--za-parallax) * -1);
 }
 .stage__text {
 	color: var(--text-color);

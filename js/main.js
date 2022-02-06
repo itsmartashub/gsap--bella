@@ -234,11 +234,84 @@ function getPortfolioOffset(clientY) {
 	return -(select('.portfolio__categories').clientHeight / clientY);
 }
 
+function initImageParallax() {
+	// select all sections .with-parallax
+	const parallaxElements = gsap.utils.toArray('.with-parallax');
+	if (!parallaxElements[0]) return;
+
+	parallaxElements.forEach(laxEl => {
+		// get the image
+		const image = laxEl.querySelector('img');
+
+		console.log(image);
+
+		//create tween for the image
+		gsap.to(image, {
+			yPercent: 40, // jer je img po defaultu top: -40%
+			ease: 'none',
+			scrollTrigger: {
+				trigger: laxEl,
+				start: 'top bottom',
+				scrub: true, //! kada user skroluje nesto se desava, kada ne skroluje nista se ne desava. OVo je najbitniji properti za ovo
+				// markers: true,
+			},
+		});
+	});
+}
+
+function initPinSteps() {
+	ScrollTrigger.create({
+		trigger: '.fixed-nav',
+		start: 'top center',
+		endTrigger: '#stage4',
+		end: 'center center',
+		pin: true,
+		// markers: true,
+	});
+
+	const getVh = () => {
+		const vh = Math.max(
+			document.documentElement.clientHeight || 0,
+			window.innerHeight || 0
+		);
+		return vh;
+	};
+
+	const updateBodyColor = color => {
+		// gsap way of changing color
+		// gsap.to('.fill-background', { backgroundColor: color, ease: 'none' });
+
+		// css way of changing color
+		document.documentElement.style.setProperty('--bcg-fill-color', color);
+	};
+
+	gsap.utils.toArray('.stage').forEach((stage, index) => {
+		const navLinks = gsap.utils.toArray('.fixed-nav li');
+
+		console.log(stage.clientHeight + getVh() / 10);
+
+		ScrollTrigger.create({
+			trigger: stage,
+			start: 'top center',
+			end: () => `+=${stage.clientHeight + getVh() / 10}`, // podelejno za 10 (vh) jer nas ovaj stage element ima padding tih 10vh u kojima trigger nije okinut. Tj nema tog free space iliti delaya izmedju toggles, tj manjanja aktivnih klasa
+			toggleClass: {
+				targets: navLinks[index],
+				className: 'is-active',
+			},
+			markers: true,
+			onEnter: () => updateBodyColor(stage.dataset.color), // dakle kada ovaj stage enter, kada skrol triger postane aktivan, tada dohvatamo dataset sa stage u kom storagujemo boju, i menjamo boju onog diva .fill-background
+			onEnterBack: () => updateBodyColor(stage.dataset.color), // da i kad se vracamo da se menja boja
+		});
+	});
+}
+
 function init() {
 	initNavigation();
 	initHeaderTilt();
 	initHoverReveal();
 	initPortfolioHover();
+	initImageParallax();
+	initPinSteps();
 }
 
 window.addEventListener('load', function () {
