@@ -52,7 +52,7 @@ function initNavigation() {
 		},
 		onEnter: ({ direction }) => navAnimation(direction),
 		onLeaveBack: ({ direction }) => navAnimation(direction),
-		markers: true,
+		// markers: true,
 	});
 }
 
@@ -245,7 +245,7 @@ function initImageParallax() {
 		// get the image
 		const image = laxEl.querySelector('img');
 
-		console.log(image);
+		// console.log(image);
 
 		//create tween for the image
 		gsap.to(image, {
@@ -292,7 +292,7 @@ function initPinSteps() {
 	gsap.utils.toArray('.stage').forEach((stage, index) => {
 		const navLinks = gsap.utils.toArray('.fixed-nav li');
 
-		console.log(stage.clientHeight + getVh() / 10);
+		// console.log(stage.clientHeight + getVh() / 10);
 
 		ScrollTrigger.create({
 			trigger: stage,
@@ -302,7 +302,7 @@ function initPinSteps() {
 				targets: navLinks[index],
 				className: 'is-active',
 			},
-			markers: true,
+			// markers: true,
 			onEnter: () => updateBodyColor(stage.dataset.color), // dakle kada ovaj stage enter, kada skrol triger postane aktivan, tada dohvatamo dataset sa stage u kom storagujemo boju, i menjamo boju onog diva .fill-background
 			onEnterBack: () => updateBodyColor(stage.dataset.color), // da i kad se vracamo da se menja boja
 		});
@@ -351,7 +351,60 @@ function initSmoothScrollbar() {
 	bodyScrollBar.addListener(ScrollTrigger.update);
 }
 
+function initLoader() {
+	const tlLoaderIn = gsap.timeline({
+		id: 'tlLoaderIn', // Ovo je sa GSDevTools koji kod mene jbg ne radi jer je to za premium
+		defaults: {
+			duration: 1.1,
+			ease: 'power2.out',
+		},
+		onComplete: () => select('body').classList.remove('is-loading'),
+	});
+
+	const loaderInner = select('.loader .inner');
+	const image = select('.loader__image img');
+	const mask = select('.loader__image--mask');
+	const line1 = select('.loader__title--mask:nth-child(1) span');
+	const line2 = select('.loader__title--mask:nth-child(2) span');
+	const lines = selectAll('.loader__title--mask');
+	const loader = select('.loader');
+	const loaderContent = select('.loader__content');
+
+	tlLoaderIn
+		.set([loader, loaderContent], { autoAlpha: 1 })
+		.from(loaderInner, { scaleY: 0, transformOrigin: 'bottom' }, 0.2)
+		.addLabel('revealImage')
+		.from(mask, { yPercent: 100 }, 'revealImage-=0.6') // koliko god da prethodni deo timeline-a traje zelimo da ovaj krene 0.6s ranije, overlapuje ga
+		.from(image, { yPercent: -80 }, 'revealImage-=0.6') // krece se usuprotnom pravcu od svog containera tj mask-a, i onda deluje kao parallax. Mask ide gore, slika na dole
+		.from(
+			[line1, line2],
+			{ yPercent: 100, stagger: 0.1 },
+			'revealImage-=0.4'
+		);
+
+	const tlLoaderOut = gsap.timeline({
+		id: 'tlLoaderOut',
+		defaults: {
+			duration: 1.1,
+			ease: 'power2.inOut',
+		},
+		delay: 1,
+	});
+
+	tlLoaderOut
+		.to(lines, { yPercent: -300, stagger: 0.2 }, 0)
+		.to([loader, loaderContent], { yPercent: -100 }, 0.2)
+		.from('#main', { y: 150 }, 0.2);
+
+	// treba nam time gap izmedju ova dva timeline-a, izmedju tlLoaderIn i tlLoaderOut:
+	const tlLoader = gsap.timeline();
+	tlLoader.add(tlLoaderIn).add(tlLoaderOut);
+
+	// GSDevTools.create({ paused: true });
+}
+
 function init() {
+	initLoader();
 	initSmoothScrollbar();
 	initNavigation();
 	initHeaderTilt();

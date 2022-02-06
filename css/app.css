@@ -36,7 +36,7 @@ body {
 	overflow-y: hidden;
 }
 /* hide page content by default */
-/* .is-loading #main,
+.is-loading #main,
 .is-loading .logo,
 .is-loading .burger,
 .is-loading .main-nav,
@@ -49,7 +49,7 @@ body {
 .is-transitioning {
 	pointer-events: none;
 	cursor: progress;
-} */
+}
 
 /* =GSAP Smooth Scrolling demo */
 #viewport {
@@ -471,7 +471,7 @@ header h1 span {
 	justify-content: center;
 	align-items: center;
 	background: transparent;
-	visibility: hidden; /* hide loader content by default */
+	/* visibility: hidden; hide loader content by default */
 }
 .loader__title {
 	font-size: 7vw;
@@ -495,6 +495,14 @@ header h1 span {
 }
 .loader__title--mask {
 	overflow: hidden;
+
+	/*! Optimizing loader kada element NIJE FIXED il i ABSOLUTE (wtf). Idi u devtools konzolu > rendering i cekiraj Paint flashing, ili FPS meter, ili most expensive Layput Shift Regions itd */
+	/*! Ne treba overusovati ove propertije, vec ugl stavljati na el koje nisu po difoltu position: fixed; ili position: absolute; */
+	/*TODO ISTRAZITI ZASTO. Al sad ima smisla zasto je Bella tako struktuirana, sve sto moze je sa position-om pozicionirano */
+	/*!!!!!!!!! Dakle kada je nesto pozicionirano sa ABSOLUTE, ugl nema issues-a kada koristimo GSAP !!!!!!!!!! */
+	will-change: transform;
+	transform: translateZ(0);
+	backface-visibility: hidden;
 }
 .loader__title--mask span {
 	display: block;
