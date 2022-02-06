@@ -1,5 +1,7 @@
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
+let bodyScrollBar;
+
 const select = e => document.querySelector(e);
 const selectAll = e => document.querySelectorAll(e);
 
@@ -252,7 +254,8 @@ function initImageParallax() {
 			scrollTrigger: {
 				trigger: laxEl,
 				start: 'top bottom',
-				scrub: 1, //! kada user skroluje nesto se desava, kada ne skroluje nista se ne desava. OVo je najbitniji properti za ovo
+				scrub: true,
+				// scrub: 1, //! kada user skroluje nesto se desava, kada ne skroluje nista se ne desava. OVo je najbitniji properti za ovo
 				// markers: true,
 			},
 		});
@@ -314,16 +317,42 @@ function initScrollTo() {
 		link.addEventListener('click', e => {
 			e.preventDefault();
 
-			gsap.to(window, {
-				duration: 1.5,
-				scrollTo: target,
-				ease: 'Power2.out',
+			bodyScrollBar.scrollIntoView(document.select(target), {
+				damping: 0.07,
+				offsetTop: 100,
 			});
+
+			// gsap.to(window, {
+			// 	duration: 1.5,
+			// 	scrollTo: target,
+			// 	ease: 'Power2.out',
+			// });
 		});
 	});
 }
 
+function initSmoothScrollbar() {
+	bodyScrollBar = Scrollbar.init(select('#viewport'), { damping: 0.07 });
+
+	// remove horizontal scrollbar
+	bodyScrollBar.track.xAxis.element.remove();
+
+	// keep ScrollTrigger in sync with Smooth Scrollbar
+	ScrollTrigger.scrollerProxy(document.body, {
+		scrollTop(value) {
+			if (arguments.length) {
+				bodyScrollBar.scrollTop = value; // setter
+			}
+			return bodyScrollBar.scrollTop; // getter
+		},
+	});
+
+	// when the smooth scroller updates, tell ScrollTrigger to update() too:
+	bodyScrollBar.addListener(ScrollTrigger.update);
+}
+
 function init() {
+	initSmoothScrollbar();
 	initNavigation();
 	initHeaderTilt();
 	initHoverReveal();
@@ -331,13 +360,14 @@ function init() {
 	initImageParallax();
 	initPinSteps();
 	initScrollTo();
-	// initSmoothScrolling();
 }
 
 window.addEventListener('load', function () {
 	init();
 });
 
+// * ======================= GSAP SMOOTHSCROLLING
+/*
 let container = select('#scroll-container');
 let height;
 function setHeight() {
@@ -364,6 +394,8 @@ gsap.to(container, {
 
 	//! kako popraviti parallax skrol i smooth? Pa dati im isti scrub da se syncuje ista brzina kao, i za pin staviti pinReparent: true
 });
+*/
+// * ======================= GSAP SMOOTHSCROLLING
 
 // !============================= UKLONITI GSAP PROPS I EFEKTE ZA MOBILE ZA REVEALT GALLERY
 /*

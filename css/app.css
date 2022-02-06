@@ -30,7 +30,10 @@ body {
 		sans-serif;
 	color: var(--text-dark-color);
 
-	overflow-y: scroll; /* //! preventovace jumping za 15px od skrolbara (kad se dodaje i nestaje skrolbar) i stalno ce biti prikazan skrolbar */
+	/* overflow-y: scroll; */
+	/* //! preventovace jumping za 15px od skrolbara (kad se dodaje i nestaje skrolbar) i stalno ce biti prikazan skrolbar */
+
+	overflow-y: hidden;
 }
 /* hide page content by default */
 /* .is-loading #main,
@@ -60,14 +63,14 @@ body {
 
 	/* //! i posto je ovo fixed, body nema uopste height, i to cemo osle popraviti sa js-om, a stavili smo width i height 100% od parenta jelte sto je body u ovom slucaju, pa smo izgubili i scrollbar. I to cemo da popravimo sa js tako sto cemo pokupiti height od scroll-containera (gde je sadrzaj) i dodeliti ga i bodiju */
 }
-#scroll-container {
+/* #scroll-container {
 	position: absolute;
 	overflow: hidden;
 	width: 100%;
-	will-change: transform; /* //? zbog performansi */
-	backface-visibility: hidden; /* //? zbog performansi */
+	will-change: transform;
+	backface-visibility: hidden;
 	z-index: 3;
-}
+} */
 
 /* =Top Nav */
 .logo {
