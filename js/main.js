@@ -13,6 +13,11 @@ const smallImage = select('.portfolio__image--s');
 const lInside = select('.portfolio__image--l .image_inside');
 const sInside = select('.portfolio__image--s .image_inside');
 
+const loader = select('.loader');
+const loaderInner = select('.loader .inner');
+const progressBar = select('.loader .progress');
+const loaderMask = select('.loader__mask');
+
 function initNavigation() {
 	const mainNavLinks = gsap.utils.toArray('.main-nav a'); //? [a, a, a, a, a]  ovo ce biti array od nasih linkova, da posle mozemo da lupujemo kroz njih
 	// gsap.utils.toArray() --> selector text (returns the raw elements wrapped in an Array)
@@ -351,13 +356,8 @@ function initSmoothScrollbar() {
 	bodyScrollBar.addListener(ScrollTrigger.update);
 }
 
-const loader = select('.loader');
-const loaderInner = select('.loader .inner');
-const progressBar = select('.loader .progress');
-
 //show loader down
 gsap.set(loader, { autoAlpha: 1 });
-
 // scale loader down
 gsap.set(loaderInner, { scaleY: 0.005, transformOrigin: 'bottom' });
 
@@ -392,7 +392,7 @@ imgLoad.on('progress', function () {
 // do whatever you want when all images are loaded
 imgLoad.on('done', function (instance) {
 	// we will simply init put loader animation onComplete
-	gsap.set(progressBar, { autoAlpha: 0, onComplete: initLoader });
+	gsap.set(progressBar, { autoAlpha: 0, onComplete: initPageTransitions });
 });
 
 //update the progress of our prorgessBar tween
@@ -460,6 +460,83 @@ function initLoader() {
 	// GSDevTools.create({ paused: true });
 }
 
+function pageTransitionIn({ container }) {
+	// ovo je ono iz current.container samo destructuring
+	console.log('pageTransitionIn');
+	// return gsap.to('.transition', {
+	// 	duration: 1,
+	// 	yPercent: -100,
+	// 	ease: 'power1.inOut',
+	// });
+
+	//timeline to stretch the loader over whole screen
+	const tl = gsap.timeline({
+		defaults: {
+			duration: 0.7,
+			ease: 'power1.inOut',
+		},
+	});
+	tl.set(loaderInner, { autoAlpha: 0 })
+		.fromTo(loader, { yPercent: -100 }, { yPercent: 0 })
+		.fromTo(loaderMask, { yPercent: 80 }, { yPercent: 0 }, 0)
+		.to(container, { y: 150 }, 0);
+
+	return tl;
+}
+function pageTransitionOut({ container }) {
+	console.log('pageTransitionOut');
+	// return gsap.to('.transition', {
+	// 	duration: 1,
+	// 	yPercent: 0,
+	// 	ease: 'power1.inOut',
+	// });
+
+	//timeline to move loader away down
+	const tl = gsap.timeline({
+		defaults: {
+			duration: 0.7,
+			ease: 'power1.inOut',
+		},
+	});
+	tl.to(loader, { yPercent: 100 })
+		.to(loaderMask, { yPercent: -80 }, 0)
+		.from(container, { y: -150 }, 0);
+
+	return tl;
+}
+function initPageTransitions() {
+	// do something before transition starts
+	barba.hooks.before(() => {
+		select('html').classList.add('is-transitioning');
+	});
+	// do something after the transition finished
+	barba.hooks.after(() => {
+		select('html').classList.remove('is-transitioning');
+	});
+
+	// scroll to the top of the page - ako na prethodnoj str skrolujemo da sledeca bude na topu
+	barba.hooks.enter(() => window.scrollTo(0, 0));
+
+	barba.init({
+		transitions: [
+			{
+				once() {
+					// do something once on the initial page load
+					initLoader();
+				},
+				async leave({ current }) {
+					// animate loading screent in
+					await pageTransitionIn(current); //! async await je jednostavno da sacekamo da se skroz animacija zavrsi pa da predjemo na enter()
+				},
+				enter({ next }) {
+					// animate loading screent away
+					pageTransitionOut(next);
+				},
+			},
+		],
+	});
+}
+
 function init() {
 	// initLoader();
 	initSmoothScrollbar();
@@ -471,10 +548,7 @@ function init() {
 	initPinSteps();
 	initScrollTo();
 }
-
-window.addEventListener('load', function () {
-	init();
-});
+init();
 
 // * ======================= GSAP SMOOTHSCROLLING
 /*
